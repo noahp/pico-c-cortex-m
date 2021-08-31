@@ -61,6 +61,34 @@ __attribute__((section(".isr_vector"))) void (*const g_pfnVectors[])(void) = {
     HardFault_Handler,
 };
 
+// Cortex-M cycle-counting registers. See the ARM v7-m Architecture Reference
+// Manual for details.
+#define DWT_CYCCNT (*(volatile uint32_t *)0xE0001004)
+#define DWT_CTRL (*(volatile uint32_t *)0xE0001000)
+#define DWT_CTRL_CYCCNTENA (1u << 0)
+
+void enable_cycle_counter(void) { DWT_CTRL |= DWT_CTRL_CYCCNTENA; }
+uint32_t read_cycle_counter(void) { return DWT_CYCCNT; }
+
+void test_memcpy(void) {
+  struct _128_bytes {
+    char data[128];
+  };
+  // instantiate 2 structs. for our purposes, we don't care what data is in
+  // there. set them to `volatile` so the compiler won't optimize away what we
+  // do with them
+  volatile struct _128_bytes dest, source;
+
+  enable_cycle_counter(); // << Enable Cycle Counter
+
+  uint32_t start = read_cycle_counter(); // << Start count
+  memcpy((void *)&dest, (void *)&source, sizeof(dest));
+  uint32_t stop = read_cycle_counter(); // << Stop count
+
+  // print out the cycles consumed
+  printf("memcpy cyccnt = %lu\n", stop - start);
+}
+
 int main(void) {
   initialise_monitor_handles();
 
@@ -68,6 +96,8 @@ int main(void) {
   setvbuf(stdout, NULL, _IOLBF, 0);
 
   printf("🦄 Hello there!\n");
+
+  test_memcpy();
 
   while (1) {
   };
