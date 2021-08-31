@@ -41,6 +41,10 @@ LDFLAGS += \
 SRCS += \
   main.c
 
+ifeq ($(FAST_MEMCPY),1)
+SRCS += memcpy.c
+endif
+
 all: $(TARGET)
 
 OBJS = $(patsubst %.c, %.o, $(SRCS))
