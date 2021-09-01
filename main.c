@@ -15,22 +15,26 @@ void enable_cycle_counter(void) { DWT_CTRL |= DWT_CTRL_CYCCNTENA; }
 uint32_t read_cycle_counter(void) { return DWT_CYCCNT; }
 
 void test_memcpy(void) {
-  struct _128_bytes {
-    char data[128];
+  struct test_struct {
+    char data[4096];
   };
   // instantiate 2 structs. for our purposes, we don't care what data is in
   // there. set them to `volatile` so the compiler won't optimize away what we
   // do with them
-  volatile struct _128_bytes dest, source;
+  volatile struct test_struct dest, source;
 
   enable_cycle_counter(); // << Enable Cycle Counter
 
-  uint32_t start = read_cycle_counter(); // << Start count
-  memcpy((void *)&dest, (void *)&source, sizeof(dest));
-  uint32_t stop = read_cycle_counter(); // << Stop count
+  // run through powers-of-two memcpy's, printing stats for each test
+  for (size_t len = 1; len <= sizeof(dest); len <<= 1) {
+    uint32_t start = read_cycle_counter(); // << Start count
+    memcpy((void *)&dest, (void *)&source, len);
+    uint32_t stop = read_cycle_counter(); // << Stop count
 
-  // print out the cycles consumed
-  printf("memcpy cyccnt = %lu\n", stop - start);
+    // print out the cycles consumed
+    printf("len = %lu, cyccnt = %lu, cycles/byte = %0.3f\n", (uint32_t)len, stop - start,
+           (float)(stop - start) / (float)len);
+  }
 }
 
 int main(void) {
@@ -72,6 +76,15 @@ static void prv_cinit(void) {
 }
 
 __attribute__((noreturn)) void Reset_Handler(void) {
+  // __ARM_FP is defined by the compiler if -mfloat-abi=hard is set
+  #if defined(__ARM_FP)
+  // enable floating-point access; some instructions emitted at -O3 will make
+  // use of the FP co-processor, eg vldr.64
+#define CPACR (*(volatile uint32_t *)0xE000ED88)
+  CPACR |= ((3UL << 10 * 2) | /* set CP10 Full Access */
+            (3UL << 11 * 2)); /* set CP11 Full Access */
+  #endif
+
   prv_cinit();
 
   // Call the application's entry point.

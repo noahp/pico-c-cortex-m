@@ -36,7 +36,8 @@ LDFLAGS += \
   --specs=rdimon.specs \
   --specs=nano.specs \
   -Wl,--gc-sections,-Map,$(TARGET).map,--build-id \
-  -Wl,--print-memory-usage
+  -Wl,--print-memory-usage \
+  -u _printf_float
 
 SRCS += \
   main.c
@@ -71,7 +72,7 @@ $(TARGET): stm32f407.ld $(OBJS)
 	$(CC) $(CFLAGS) -T$^ $(LDFLAGS) -o $@
 	arm-none-eabi-size $(TARGET)
 
-flash: $(TARGET)
+debug:
 	openocd -f stm32f4.openocd.cfg
 
 gdb: $(TARGET)
