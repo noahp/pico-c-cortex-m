@@ -48,11 +48,15 @@ SRCS += \
 
 ifeq ($(FAST_MEMCPY),1)
 SRCS += memcpy.c
+else
+ifeq ($(FASTER_MEMCPY),1)
+SRCS += memcpy-armv7m.S
+endif
 endif
 
 all: $(TARGET)
 
-OBJS = $(patsubst %.c, %.o, $(SRCS))
+OBJS = $(SRCS:%=%.o)
 OBJS := $(addprefix $(BUILDDIR)/,$(OBJS))
 
 # depfiles for tracking include changes
@@ -66,7 +70,7 @@ $(BUILDDIR):
 clean:
 	$(RM) $(BUILDDIR)
 
-$(BUILDDIR)/%.o: %.c
+$(BUILDDIR)/%.o: %
 	mkdir -p $(dir $@)
 	$(info Compiling $<)
 	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@

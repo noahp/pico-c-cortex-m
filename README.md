@@ -15,5 +15,13 @@ To run the test on the stm32f4-discovery board:
 5. type `continue` to start the program in gdb
 6. look for the semihosting output in the openocd terminal
 
-To test the alternate `memcpy` implementation, clean and use `FAST_MEMCPY=1 make
-gdb`.
+There are 2 alternate memcpy implementations (copied from the newlib sources).
+To test them, clean and use the following commands:
+
+- `FAST_MEMCPY=1 make gdb` <- this will test the non-size-optimized C
+  implementation
+- `FASTER_MEMCPY=1 make gdb` <- this will test with the speed optimized assembly
+  implementation
+
+To run on other boards, it should be sufficient to modify the linker script and
+openocd cfg (or use a different debug adapter altogether).
