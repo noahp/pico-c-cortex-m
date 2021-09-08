@@ -34,10 +34,14 @@ CFLAGS += \
 
 LDFLAGS += \
   --specs=rdimon.specs \
-  --specs=nano.specs \
   -Wl,--gc-sections,-Map,$(TARGET).map,--build-id \
   -Wl,--print-memory-usage \
   -u _printf_float
+
+ifeq ($(FAT_NEWLIB),)
+LDFLAGS += \
+  --specs=nano.specs
+endif
 
 SRCS += \
   main.c
