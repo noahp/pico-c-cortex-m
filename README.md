@@ -25,3 +25,11 @@ To test them, clean and use the following commands:
 
 To run on other boards, it should be sufficient to modify the linker script and
 openocd cfg (or use a different debug adapter altogether).
+
+## Licensing
+
+Everything is public domain *except* for the newlib derived material, which is
+covered under the license [COPYING.NEWLIB](COPYING.NEWLIB).
+
+Those sources were taken from f961a63ed670788074c688c0cdaab3b5146b6b61 of
+git://sourceware.org/git/newlib-cygwin.git .
