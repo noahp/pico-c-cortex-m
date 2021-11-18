@@ -67,7 +67,7 @@ $(TARGET): stm32f407.ld $(OBJS)
 	$(CC) $(CFLAGS) -T$^ $(LDFLAGS) -o $@
 	arm-none-eabi-size $(TARGET)
 
-flash: $(TARGET)
+debug: $(TARGET)
 	openocd -f stm32f4.openocd.cfg
 
 gdb: $(TARGET)
