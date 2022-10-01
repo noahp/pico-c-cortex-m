@@ -68,6 +68,7 @@ int main(void) {
   setvbuf(stdout, NULL, _IOLBF, 0);
 
   printf("🦄 Hello there!\n");
+  printf("Version: %s\n", GIT_VERSION);
 
   while (1) {
   };

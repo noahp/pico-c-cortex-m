@@ -32,6 +32,12 @@ CFLAGS += \
   -Wextra \
   -Wundef \
 
+# Add a git version identifier; either clean tag, or with -dirty suffix if
+# working tree is dirty.
+GIT_VERSION ?= $(shell git describe --dirty --always --tags)
+
+CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+
 LDFLAGS += \
   --specs=rdimon.specs \
   --specs=nano.specs \
