@@ -45,9 +45,22 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-	.text :
+	/* interrupt vector table placed at the start of flash */
+	.isr_vector :
 	{
 		KEEP(*(.isr_vector))
+	} > FLASH
+
+	/* calibration data uses the second sector of flash */
+	.calibration_constants ORIGIN(FLASH) + 16K:
+	{
+		PROVIDE(__calibration_constants_start = .);
+		KEEP(*(.calibration_constants*))
+	} > FLASH
+
+	/* place the rest of the program starting at the next sector */
+	.text ORIGIN(FLASH) + 32K:
+	{
 		*(.text*)
 
 		KEEP(*(.init))

@@ -52,6 +52,25 @@ all: $(TARGET)
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 OBJS := $(addprefix $(BUILDDIR)/,$(OBJS))
 
+# add a binary file that's generated separately from the main compilation steps:
+# 1. generate the raw data
+$(BUILDDIR)/calibration_constants.bin: calibration_data.json
+	./generate_calibration_constants.py calibration_data.json $@
+
+# 2. convert the binary calibration data into an object file that can be linked
+#    into the main application. rename the auto-generated symbols for the start
+#    and end of the object data so we can reference them from the application.
+#    rename the section to something that can be placed explicitly from the
+#    linker script, if necessary
+$(BUILDDIR)/calibration_constants.o: $(BUILDDIR)/calibration_constants.bin
+	mkdir -p $(dir $@)
+	arm-none-eabi-objcopy -I binary -O elf32-littlearm -B arm \
+		--rename-section .data=.calibration_constants $^ $@
+
+ifneq ($(INCLUDE_CALIBRATION_BIN),)
+OBJS += $(BUILDDIR)/calibration_constants.o
+endif
+
 # depfiles for tracking include changes
 DEPFILES = $(OBJS:%.o=%.o.d)
 DEPFLAGS = -MT $@ -MMD -MP -MF $@.d

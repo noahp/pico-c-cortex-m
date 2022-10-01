@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -61,6 +62,21 @@ __attribute__((section(".isr_vector"))) void (*const g_pfnVectors[])(void) = {
     HardFault_Handler,
 };
 
+extern uint8_t __calibration_constants_start;
+
+struct calibration_constants {
+  uint32_t upper_cal;
+  uint32_t lower_cal;
+  uint32_t crc32;
+};
+
+static void print_calibration_constants(void) {
+  struct calibration_constants *caldata =
+      (struct calibration_constants *)&__calibration_constants_start;
+  printf("calibration data: %" PRIu32 ", %" PRIu32 ", 0x%08" PRIx32, caldata->upper_cal,
+         caldata->lower_cal, caldata->crc32);
+}
+
 int main(void) {
   initialise_monitor_handles();
 
@@ -69,6 +85,7 @@ int main(void) {
 
   printf("🦄 Hello there!\n");
   printf("Version: %s\n", GIT_VERSION);
+  print_calibration_constants();
 
   while (1) {
   };
